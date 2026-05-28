@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import heroImg from "@/assets/hero.jpg";
 import fabricImg from "@/assets/fabric.jpg";
 import makerImg from "@/assets/maker.jpg";
@@ -22,6 +23,7 @@ function Index() {
       <Nav />
       <Hero />
       <Marquee />
+      <Search />
       <Label />
       <Makers />
       <Manifesto />
@@ -43,7 +45,7 @@ function Nav() {
           <a href="#label" className="hover:text-foreground transition">The Label</a>
           <a href="#makers" className="hover:text-foreground transition">Makers</a>
           <a href="#journal" className="hover:text-foreground transition">Journal</a>
-          <a href="#" className="hover:text-foreground transition">Shop</a>
+          <a href="#search" className="hover:text-foreground transition">Shop</a>
         </nav>
         <a href="#" className="text-sm rounded-full border border-foreground/20 px-4 py-2 hover:bg-foreground hover:text-background transition">
           Sign in
