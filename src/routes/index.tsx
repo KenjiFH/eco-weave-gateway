@@ -86,7 +86,7 @@ function Hero() {
             <a href="#" className="rounded-full bg-foreground text-background px-7 py-3.5 text-sm font-medium hover:bg-moss transition">
               Explore the marketplace
             </a>
-            <a href="#label" className="rounded-full px-2 py-3.5 text-sm font-medium underline-offset-4 hover:underline">
+            <a href="#label" onClick={(e) => smoothScrollTo(e, "label")} className="rounded-full px-2 py-3.5 text-sm font-medium underline-offset-4 hover:underline">
               How verification works →
             </a>
           </div>
