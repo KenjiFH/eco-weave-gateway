@@ -139,6 +139,202 @@ function Marquee() {
 }
 
 function Label() {
+  return LabelInner();
+}
+
+type Product = {
+  id: string;
+  name: string;
+  company: string;
+  type: "Tops" | "Bottoms" | "Outerwear" | "Knitwear" | "Dresses";
+  score: number; // 0-100
+  price: number;
+  material: string;
+  description: string;
+  palette: [string, string];
+};
+
+const PRODUCTS: Product[] = [
+  { id: "p1", name: "Madder Linen Tunic", company: "Studio Anjali", type: "Tops", score: 96, price: 128, material: "Organic linen, madder dye", description: "Loose hand-loomed tunic dyed with madder root. Breathes like a second skin.", palette: ["#c2956b", "#8b6f5e"] },
+  { id: "p2", name: "Indigo Field Shirt", company: "Studio Anjali", type: "Tops", score: 92, price: 145, material: "GOTS cotton, plant indigo", description: "Workwear shirt vat-dyed in small batches. Softens over years, not weeks.", palette: ["#2d5a7a", "#1a3c52"] },
+  { id: "p3", name: "Porto Wide Trouser", company: "Loom & Linden", type: "Bottoms", score: 88, price: 168, material: "European flax linen", description: "High-rise trouser woven on century-old looms in northern Portugal.", palette: ["#dce5d4", "#a8c0a0"] },
+  { id: "p4", name: "Oat Carpenter Pant", company: "Loom & Linden", type: "Bottoms", score: 84, price: 152, material: "Hemp-cotton blend", description: "Utility cut with corozo buttons and reinforced tool loops. Built to outlast you.", palette: ["#e8d5b7", "#c4a47a"] },
+  { id: "p5", name: "Sauvage Wool Cardigan", company: "Maison Sauvage", type: "Knitwear", score: 90, price: 245, material: "Undyed highland wool", description: "Chunky cardigan knit by a four-woman co-op in Oaxaca. Naturally lanolin-rich.", palette: ["#6b5d4a", "#3d352a"] },
+  { id: "p6", name: "Sage Crewneck", company: "Maison Sauvage", type: "Knitwear", score: 86, price: 198, material: "Alpaca, plant-dyed", description: "Featherweight crew dyed with sage. Warm, light, biodegradable.", palette: ["#87a878", "#4a6741"] },
+  { id: "p7", name: "Terra Field Jacket", company: "North Bothy", type: "Outerwear", score: 82, price: 385, material: "Waxed organic cotton", description: "Waxed with beeswax and pine resin — no PFAS, no plastics. Re-waxable forever.", palette: ["#9b4423", "#5c2018"] },
+  { id: "p8", name: "Moss Chore Coat", company: "North Bothy", type: "Outerwear", score: 79, price: 298, material: "Hemp canvas", description: "Boxy chore coat with four utility pockets. Stiff at first, then molded to you.", palette: ["#4a6741", "#2d3f28"] },
+  { id: "p9", name: "Almond Slip Dress", company: "Casa Lino", type: "Dresses", score: 94, price: 215, material: "Peace silk, undyed", description: "Bias-cut slip in non-violent silk. The colour of the cocoon itself.", palette: ["#e8c5a0", "#c9a87a"] },
+  { id: "p10", name: "Cochineal Midi", company: "Casa Lino", type: "Dresses", score: 89, price: 268, material: "Organic cotton, cochineal", description: "Midi dress flooded with cochineal red — a 3,000-year-old natural pigment.", palette: ["#c44569", "#7a2a3d"] },
+  { id: "p11", name: "Reseda Tee", company: "Studio Anjali", type: "Tops", score: 91, price: 78, material: "Pima cotton, weld dye", description: "Boxy tee in soft weld-yellow. The everyday staple, done properly.", palette: ["#d4c270", "#8a8045"] },
+  { id: "p12", name: "Bothy Overshirt", company: "North Bothy", type: "Outerwear", score: 85, price: 225, material: "Recycled wool", description: "Heavy overshirt made from reclaimed mill ends. No two are exactly alike.", palette: ["#3d4a52", "#1f2a30"] },
+];
+
+type GroupBy = "company" | "type" | "score";
+
+function Search() {
+  const [q, setQ] = useState("");
+  const [groupBy, setGroupBy] = useState<GroupBy>("company");
+
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return PRODUCTS;
+    return PRODUCTS.filter((p) =>
+      [p.name, p.company, p.type, p.material, p.description].some((f) =>
+        f.toLowerCase().includes(needle),
+      ),
+    );
+  }, [q]);
+
+  const groups = useMemo(() => {
+    const map = new Map<string, Product[]>();
+    for (const p of filtered) {
+      let key: string;
+      if (groupBy === "company") key = p.company;
+      else if (groupBy === "type") key = p.type;
+      else key = p.score >= 90 ? "Exceptional (90–100)" : p.score >= 85 ? "Excellent (85–89)" : "Verified (75–84)";
+      const arr = map.get(key) ?? [];
+      arr.push(p);
+      map.set(key, arr);
+    }
+    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [filtered, groupBy]);
+
+  return (
+    <section id="search" className="px-6 py-28 lg:py-32 border-t border-border">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex items-end justify-between gap-8 flex-wrap mb-10">
+          <div className="max-w-xl">
+            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">The Marketplace</div>
+            <h2 className="font-display text-5xl lg:text-6xl leading-[1.05]">
+              Search by what's <em className="italic text-clay font-light">inside.</em>
+            </h2>
+          </div>
+          <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
+            Filter by maker, material, or sustainability score. Every result is verified to our standard.
+          </p>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-3 mb-10">
+          <label className="flex items-center gap-3 flex-1 rounded-full border border-border bg-card px-5 py-3.5 focus-within:border-foreground/40 transition">
+            <SearchIcon className="h-4 w-4 text-muted-foreground" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Try 'linen', 'indigo', or 'Oaxaca'"
+              className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+            />
+            {q && (
+              <button onClick={() => setQ("")} className="text-xs text-muted-foreground hover:text-foreground">Clear</button>
+            )}
+          </label>
+          <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1">
+            {(["company", "type", "score"] as GroupBy[]).map((g) => (
+              <button
+                key={g}
+                onClick={() => setGroupBy(g)}
+                className={`px-4 py-2 text-xs uppercase tracking-widest rounded-full transition ${
+                  groupBy === g ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {g === "company" ? "Maker" : g === "type" ? "Type" : "Score"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {groups.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border p-16 text-center text-muted-foreground">
+            No garments match "{q}". Try a different fibre or maker.
+          </div>
+        ) : (
+          <div className="space-y-16">
+            {groups.map(([key, items]) => (
+              <div key={key}>
+                <div className="flex items-baseline justify-between mb-6 pb-3 border-b border-border">
+                  <h3 className="font-display text-2xl">{key}</h3>
+                  <span className="text-xs uppercase tracking-widest text-muted-foreground">
+                    {items.length} {items.length === 1 ? "piece" : "pieces"}
+                  </span>
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {items.map((p) => (
+                    <ProductCard key={p.id} p={p} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function ProductCard({ p }: { p: Product }) {
+  return (
+    <article className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-[var(--shadow-soft)] transition">
+      <div className="aspect-[4/5] relative overflow-hidden">
+        <GarmentVisual type={p.type} colors={p.palette} />
+        <div className="absolute top-3 left-3 text-[10px] uppercase tracking-widest bg-background/90 backdrop-blur px-2.5 py-1 rounded-full">
+          {p.type}
+        </div>
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-background/90 backdrop-blur px-2.5 py-1 rounded-full">
+          <span className="h-1.5 w-1.5 rounded-full bg-moss" />
+          <span className="text-[10px] font-medium">{p.score}</span>
+        </div>
+      </div>
+      <div className="p-5">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{p.company}</div>
+        <h4 className="font-display text-xl mt-1.5 leading-tight">{p.name}</h4>
+        <p className="text-sm text-muted-foreground mt-2.5 leading-relaxed line-clamp-2">{p.description}</p>
+        <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+          <span className="text-xs text-foreground/70">{p.material}</span>
+          <span className="font-display text-lg">${p.price}</span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function GarmentVisual({ type, colors }: { type: Product["type"]; colors: [string, string] }) {
+  const [c1, c2] = colors;
+  const bg = `linear-gradient(135deg, ${c1}22, ${c2}33)`;
+  return (
+    <div className="absolute inset-0 flex items-center justify-center" style={{ background: bg }}>
+      <svg viewBox="0 0 200 240" className="h-[78%] w-auto drop-shadow-[0_20px_30px_rgba(0,0,0,0.12)]">
+        <defs>
+          <linearGradient id={`g-${c1}-${c2}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={c1} />
+            <stop offset="100%" stopColor={c2} />
+          </linearGradient>
+        </defs>
+        {type === "Tops" && (
+          <path d="M40 50 L80 30 Q100 50 120 30 L160 50 L150 90 L130 80 L130 200 Q100 210 70 200 L70 80 L50 90 Z" fill={`url(#g-${c1}-${c2})`} />
+        )}
+        {type === "Bottoms" && (
+          <path d="M55 30 L145 30 L150 110 L130 230 L110 230 L100 130 L90 230 L70 230 L50 110 Z" fill={`url(#g-${c1}-${c2})`} />
+        )}
+        {type === "Outerwear" && (
+          <>
+            <path d="M30 55 L80 25 L100 45 L120 25 L170 55 L160 95 L150 90 L150 215 L100 220 L50 215 L50 90 L40 95 Z" fill={`url(#g-${c1}-${c2})`} />
+            <line x1="100" y1="45" x2="100" y2="220" stroke={c2} strokeWidth="2" opacity="0.4" />
+          </>
+        )}
+        {type === "Knitwear" && (
+          <>
+            <path d="M45 55 L80 35 Q100 55 120 35 L155 55 L145 100 L135 95 L135 210 Q100 220 65 210 L65 95 L55 100 Z" fill={`url(#g-${c1}-${c2})`} />
+            <path d="M65 120 Q100 130 135 120 M65 150 Q100 160 135 150 M65 180 Q100 190 135 180" stroke={c2} strokeWidth="1.5" fill="none" opacity="0.35" />
+          </>
+        )}
+        {type === "Dresses" && (
+          <path d="M70 30 Q100 50 130 30 L135 70 L155 230 Q100 240 45 230 L65 70 Z" fill={`url(#g-${c1}-${c2})`} />
+        )}
+      </svg>
+    </div>
+  );
+}
+
+function LabelInner() {
   const rows = [
     { name: "Material", val: "100% Organic Cotton", note: "GOTS certified, regeneratively farmed in Gujarat" },
     { name: "Dye", val: "Madder root + indigo", note: "Plant-based, no heavy metals" },
