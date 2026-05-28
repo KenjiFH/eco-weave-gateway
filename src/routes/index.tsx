@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
 import heroImg from "@/assets/hero.jpg";
 import fabricImg from "@/assets/fabric.jpg";
 import makerImg from "@/assets/maker.jpg";
@@ -23,7 +22,6 @@ function Index() {
       <Nav />
       <Hero />
       <Marquee />
-      <Search />
       <Label />
       <Makers />
       <Manifesto />
@@ -45,7 +43,7 @@ function Nav() {
           <a href="#label" className="hover:text-foreground transition">The Label</a>
           <a href="#makers" className="hover:text-foreground transition">Makers</a>
           <a href="#journal" className="hover:text-foreground transition">Journal</a>
-          <a href="#search" className="hover:text-foreground transition">Shop</a>
+          <a href="#" className="hover:text-foreground transition">Shop</a>
         </nav>
         <a href="#" className="text-sm rounded-full border border-foreground/20 px-4 py-2 hover:bg-foreground hover:text-background transition">
           Sign in
@@ -134,165 +132,6 @@ function Marquee() {
       </div>
       <style>{`@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-33.333%)}}`}</style>
     </div>
-  );
-}
-
-type Product = {
-  id: string;
-  name: string;
-  company: string;
-  country: string;
-  material: string;
-  price: number;
-  score: number; // 0–100 sustainability score
-};
-
-const MOCK_PRODUCTS: Product[] = [
-  { id: "EW-0241", name: "Linen Tunic", company: "Studio Anjali", country: "India", material: "Organic linen", price: 128, score: 96 },
-  { id: "EW-0188", name: "Indigo Wide Trouser", company: "Studio Anjali", country: "India", material: "Plant-dyed cotton", price: 144, score: 92 },
-  { id: "EW-0312", name: "Hand-loomed Throw Shirt", company: "Loom & Linden", country: "Portugal", material: "Hand-loomed linen", price: 168, score: 89 },
-  { id: "EW-0307", name: "Raw-edge Linen Shorts", company: "Loom & Linden", country: "Portugal", material: "Organic linen", price: 96, score: 84 },
-  { id: "EW-0421", name: "Oaxaca Knit Cardigan", company: "Maison Sauvage", country: "Mexico", material: "Naturally dyed wool", price: 218, score: 78 },
-  { id: "EW-0432", name: "Cochineal Slip Dress", company: "Maison Sauvage", country: "Mexico", material: "Plant-dyed silk", price: 196, score: 81 },
-  { id: "EW-0501", name: "Hemp Field Jacket", company: "Norr Atelier", country: "Denmark", material: "Hemp canvas", price: 285, score: 71 },
-  { id: "EW-0512", name: "Undyed Crew Tee", company: "Norr Atelier", country: "Denmark", material: "Organic cotton", price: 58, score: 88 },
-];
-
-function scoreBand(s: number) {
-  if (s >= 90) return "90–100 · Exceptional";
-  if (s >= 80) return "80–89 · Excellent";
-  if (s >= 70) return "70–79 · Good";
-  return "Below 70 · Improving";
-}
-
-function Search() {
-  const [q, setQ] = useState("");
-  const [groupBy, setGroupBy] = useState<"company" | "score">("company");
-
-  const filtered = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    if (!needle) return MOCK_PRODUCTS;
-    return MOCK_PRODUCTS.filter((p) =>
-      [p.name, p.company, p.country, p.material, p.id].some((v) =>
-        v.toLowerCase().includes(needle),
-      ),
-    );
-  }, [q]);
-
-  const groups = useMemo(() => {
-    const map = new Map<string, Product[]>();
-    for (const p of filtered) {
-      const key = groupBy === "company" ? p.company : scoreBand(p.score);
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(p);
-    }
-    return Array.from(map.entries()).sort((a, b) => {
-      if (groupBy === "score") return b[0].localeCompare(a[0]);
-      return a[0].localeCompare(b[0]);
-    });
-  }, [filtered, groupBy]);
-
-  return (
-    <section id="search" className="px-6 py-28 lg:py-36 border-b border-border">
-      <div className="mx-auto max-w-7xl">
-        <div className="flex items-end justify-between flex-wrap gap-8 mb-10">
-          <div className="max-w-xl">
-            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">The Marketplace</div>
-            <h2 className="font-display text-4xl lg:text-6xl leading-[1.05]">
-              Search by maker,<br />
-              <em className="italic text-clay font-light">material, or place.</em>
-            </h2>
-          </div>
-          <div className="text-sm text-muted-foreground max-w-xs">
-            Try <button onClick={() => setQ("linen")} className="underline underline-offset-4 hover:text-foreground">linen</button>,{" "}
-            <button onClick={() => setQ("Portugal")} className="underline underline-offset-4 hover:text-foreground">Portugal</button>, or{" "}
-            <button onClick={() => setQ("indigo")} className="underline underline-offset-4 hover:text-foreground">indigo</button>.
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-border bg-card p-5 lg:p-6 shadow-[var(--shadow-soft)] flex flex-col lg:flex-row gap-4 lg:items-center">
-          <div className="flex items-center gap-3 flex-1 px-3 py-2 rounded-2xl bg-secondary/50">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="text-foreground/60 shrink-0">
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3.5-3.5" strokeLinecap="round" />
-            </svg>
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search organic cotton, plant dyes, Portugal…"
-              className="flex-1 bg-transparent outline-none text-base placeholder:text-muted-foreground py-2"
-              aria-label="Search products"
-            />
-            {q && (
-              <button onClick={() => setQ("")} className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground">
-                Clear
-              </button>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground mr-2">Group by</span>
-            {(["company", "score"] as const).map((g) => (
-              <button
-                key={g}
-                onClick={() => setGroupBy(g)}
-                className={`text-sm rounded-full px-4 py-2 transition ${
-                  groupBy === g
-                    ? "bg-foreground text-background"
-                    : "bg-secondary/60 text-foreground/70 hover:text-foreground"
-                }`}
-              >
-                {g === "company" ? "Company" : "Sustainability score"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-4 text-xs uppercase tracking-widest text-muted-foreground">
-          {filtered.length} {filtered.length === 1 ? "result" : "results"}
-          {q && <> for "<span className="text-foreground">{q}</span>"</>}
-        </div>
-
-        <div className="mt-10 space-y-14">
-          {groups.length === 0 && (
-            <div className="py-16 text-center text-muted-foreground">
-              No garments match that search. Try a maker or material.
-            </div>
-          )}
-          {groups.map(([heading, items]) => (
-            <div key={heading}>
-              <div className="flex items-baseline justify-between pb-4 mb-6 border-b border-border">
-                <h3 className="font-display text-2xl lg:text-3xl">{heading}</h3>
-                <span className="text-xs uppercase tracking-widest text-muted-foreground">
-                  {items.length} {items.length === 1 ? "piece" : "pieces"}
-                </span>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {items.map((p) => (
-                  <article key={p.id} className="rounded-2xl border border-border bg-background p-5 hover:shadow-[var(--shadow-soft)] transition">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{p.id}</div>
-                      <div className="flex items-center gap-1.5 rounded-full bg-sage/60 text-foreground px-2.5 py-1 text-xs">
-                        <span className="h-1.5 w-1.5 rounded-full bg-moss" />
-                        {p.score}
-                      </div>
-                    </div>
-                    <h4 className="font-display text-xl mt-3 leading-snug">{p.name}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">{p.material}</p>
-                    <div className="mt-5 pt-4 border-t border-border flex items-center justify-between text-sm">
-                      <div>
-                        <div className="text-foreground">{p.company}</div>
-                        <div className="text-xs text-muted-foreground">{p.country}</div>
-                      </div>
-                      <div className="font-display text-lg">${p.price}</div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }
 
