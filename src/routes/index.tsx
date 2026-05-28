@@ -34,6 +34,15 @@ function Index() {
   );
 }
 
+function smoothScrollTo(e: MouseEvent<HTMLAnchorElement>, id: string) {
+  e.preventDefault();
+  const el = document.getElementById(id);
+  if (!el) return;
+  const offset = 0; // no offset needed
+  const top = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top, behavior: "smooth" });
+}
+
 function Nav() {
   return (
     <header className="absolute top-0 left-0 right-0 z-20">
@@ -43,10 +52,10 @@ function Nav() {
           <span className="font-display text-xl tracking-tight">Ecowear</span>
         </a>
         <nav className="hidden md:flex items-center gap-9 text-sm text-foreground/70">
-          <a href="#label" className="hover:text-foreground transition">The Label</a>
-          <a href="#search" className="hover:text-foreground transition">Shop</a>
-          <a href="#makers" className="hover:text-foreground transition">Makers</a>
-          <a href="#journal" className="hover:text-foreground transition">Journal</a>
+          <a href="#label" onClick={(e) => smoothScrollTo(e, "label")} className="hover:text-foreground transition">The Label</a>
+          <a href="#search" onClick={(e) => smoothScrollTo(e, "search")} className="hover:text-foreground transition">Shop</a>
+          <a href="#makers" onClick={(e) => smoothScrollTo(e, "makers")} className="hover:text-foreground transition">Makers</a>
+          <a href="#journal" onClick={(e) => smoothScrollTo(e, "journal")} className="hover:text-foreground transition">Journal</a>
         </nav>
         <a href="#" className="text-sm rounded-full border border-foreground/20 px-4 py-2 hover:bg-foreground hover:text-background transition">
           Sign in
