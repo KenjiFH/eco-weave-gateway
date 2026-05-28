@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type MouseEvent } from "react";
 import { Search as SearchIcon } from "lucide-react";
 import heroImg from "@/assets/hero.jpg";
 import fabricImg from "@/assets/fabric.jpg";
